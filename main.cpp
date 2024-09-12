@@ -1,36 +1,58 @@
 #include <iostream>
 using namespace std;
+void redArr(int*& arr, int& capacidad){
 
-void reDimArr(int &cap, int*& arr){
-
-    int nuevaCap = cap*2;
+    int nuevaCap = capacidad * 2;
     int* nuevoArr = new int[nuevaCap];
-    copy(arr,arr+cap,nuevoArr);
+    copy(arr,arr+capacidad,nuevoArr);
+
     delete[] arr;
     arr = nuevoArr;
-    cap = nuevoArr;
 
+    capacidad = nuevaCap;
 }
+
+
 int main()
 {
-    int cap = 2;
-    int* arr = new int[cap];
-    int cantElementos = 0;
-    char opcion;
-    do
-    {
-        if(canElementos == cap){
-            reDimArr(cap, arr);
-        }
-    }while (true);
+    int capacidad = 2;
+    int* arr = new int[capacidad];
+    int cantElementos=0;
+    int nroIngresado=0;
+    char continuar;
 
-    cout << "Ingrese un valor: "
-    cin >> arr[cantElementos];
-    cantElementos++;
-}
-while (opcion =="s"){
-    cout<< "desea continuar escriba 's', si no escriba 'n': " << endl;
-    cin >> opcion << endl;
+    do{
+
+        if(cantElementos == capacidad){
+            redArr(arr,capacidad);
+            /*int nuevaCap = capacidad * 2;
+            int* nuevoArr = new int[nuevaCap];
+            std::copy(arr,arr+capacidad,nuevoArr);
+
+            delete[] arr;
+            arr = nuevoArr;
+
+            capacidad = nuevaCap;*/
+        }
+
+
+        cout << "Ingresa un numero: ";
+        cin >> nroIngresado;
+        arr[cantElementos] = nroIngresado;
+        cantElementos++;
+
+        cout << "Si desea continuar digite s, si desea parar digite n :";
+        cin >> continuar;
+
+    }while(continuar == 's' || continuar == 'S');
+
+    for(int i = 0; i < cantElementos; i++){
+        cout << arr[i] << endl;
     }
-cout << arr; << endl;
+
+    delete[] arr;
+    return 0;
+
+}
+
 
