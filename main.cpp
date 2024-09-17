@@ -4,7 +4,7 @@ int maxVal = 0;            // Valor máximo de la señal
 int minVal = 1023;         // Valor mínimo de la señal
 unsigned long startTime;
 const unsigned long samplingTime = 1000; // Tiempo de muestreo (1 segundo)
-
+unsigned int Umbralerror=50;
 // Configuración de botones
 const int botonPin = 2;    // Botón para iniciar la adquisición
 const int botonpin2 = 4;   // Botón para detener la adquisición
@@ -81,7 +81,7 @@ void loop() {
         arrDatos[index] = val;
 
         // Guardar el tiempo
-        tiempos[index] = millis() - startTime;
+        tiempos[index] = millis();
 
         // Actualizar el valor máximo y mínimo
         if (val > maxVal) {
@@ -106,37 +106,9 @@ void calcularResultados() {
     Serial.println(amplitud);
 
     // Calcular la frecuencia comparando picos
-    if (index > 1) {  // Asegurarse de que hay más de un punto de datos
-        int numPicos = 0;
-        unsigned long tiempoPicoAnterior = 0;
-        unsigned long tiempoPicoActual = 0;
-        float sumaPeriodos = 0;
+    Serial.print("la frecuencia es: ");
+    Serial.println(Cfrecuencia(arrDatos, tiempos, capacidad,maxVal,Umbralerror));
 
-        for (int i = 1; i < index - 1; i++) {
-            // Detectar picos (máximos locales)
-            if (arrDatos[i] > arrDatos[i - 1] && arrDatos[i] > arrDatos[i + 1]) {
-                numPicos++;
-                tiempoPicoAnterior = tiempoPicoActual;
-                tiempoPicoActual = tiempos[i];
-
-                if (numPicos > 1) {
-                    float periodo = tiempoPicoActual - tiempoPicoAnterior;  // Calcular período
-                    sumaPeriodos += periodo;
-                }
-            }
-        }
-
-        if (numPicos > 1) {
-            float periodoPromedio = sumaPeriodos / (numPicos - 1);
-            float frecuencia = 1000.0 / periodoPromedio;  // Convertir a segundos
-            Serial.print("Frecuencia estimada: ");
-            Serial.println(frecuencia);
-        } else {
-            Serial.println("No se encontraron suficientes picos para calcular la frecuencia.");
-        }
-    } else {
-        Serial.println("No hay suficientes datos para calcular la frecuencia.");
-    }
 
     // Determinar forma de la señal
     String forma = determinarForma();
@@ -174,4 +146,64 @@ String determinarForma() {
     if (esTriangular) return "Triangular";
     if (esCuadrada) return "Cuadrada";
     return "Desconocida";  // Si combina varias formas
+}/*
+float Cfrecuencia(int* arrDatos, unsigned long* tiempos, int capacidad, int amplitud, unsigned int Umbralerror) {
+    int count = 0;
+    unsigned long time1 = 0, time2 = 0;
+    float frecuencia = 0.0;
+
+    // Buscar dos picos máximos en los datos con un margen de error
+    for (int i = 0; i < capacidad; i++) {
+        if (arrDatos[i] >= (amplitud - Umbralerror) && arrDatos[i] <= (amplitud + Umbralerror)) {
+            if (count == 0) {
+                time1 = tiempos[i];  // Guardar el primer tiempo
+                count++;
+            } else if (count == 1) {
+                time2 = tiempos[i];  // Guardar el segundo tiempo
+                break;               // Salir del bucle cuando se encuentran dos picos
+            }
+        }
+    }
+
+    // Asegurarse de que se hayan encontrado dos tiempos diferentes
+    if (time2 > time1) {
+        unsigned long periodo = time2 - time1;  // Diferencia de tiempos en ms
+        frecuencia = 1000.0 / periodo;          // Calcular la frecuencia en Hz con decimales
+    }
+
+    return frecuencia;
+}*/
+float Cfrecuencia(int* arrDatos, unsigned long* tiempos, int capacidad, int amplitud, unsigned int Umbralerror) {
+    int count = 0;
+    unsigned long time1 = 0, time2 = 0;
+    float frecuencia = 0.0;
+
+    // Buscar dos picos máximos en los datos con un margen de error
+    for (int i = 0; i < capacidad; i++) {
+        if (arrDatos[i] >= (amplitud - Umbralerror) && arrDatos[i] <= (amplitud + Umbralerror)) {
+            if (count == 0) {
+                time1 = tiempos[i];  // Guardar el primer tiempo
+                /*  Serial.print("Primer pico detectado en tiempo: ");
+                Serial.println(time1);  // Debug: mostrar el tiempo del primer pico */
+                count++;
+            } else if (count == 1) {
+                time2 = tiempos[i];  // Guardar el segundo tiempo
+                /*Serial.print("Segundo pico detectado en tiempo: ");
+                Serial.println(time2);  // Debug: mostrar el tiempo del segundo pico
+                */
+                break;  // Salir del bucle cuando se encuentran dos picos
+            }
+        }
+    }
+
+    // Asegurarse de que se hayan encontrado dos tiempos diferentes
+    if (time2 > time1) {
+        unsigned long periodo = time2 - time1;  // Diferencia de tiempos en ms
+        frecuencia = 1000.0 / periodo;  // Calcular la frecuencia en Hz con decimales
+    } else {
+        Serial.println("No se encontraron dos picos para calcular la frecuencia.");
+    }
+
+    return frecuencia;
 }
+
