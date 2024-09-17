@@ -1,3 +1,7 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd (12,11,10,9,8,7);
+
 int analogPin = A0;        // Pin de entrada analógica
 int val = 0;               // Valor leído del pin analógico
 int maxVal = 0;            // Valor máximo de la señal
@@ -42,7 +46,7 @@ void setup() {
     Serial.begin(9600);   // Inicializar comunicación serial
     pinMode(botonPin, INPUT);
     pinMode(botonpin2, INPUT);
-
+    lcd.begin(16,2);
     // Inicializar los arreglos dinámicos
     arrDatos = new int[capacidad];
     tiempos = new unsigned long[capacidad];
@@ -102,18 +106,32 @@ void loop() {
 void calcularResultados() {
     // Calcular amplitud pico a pico
     int amplitud = maxVal - minVal;
-    Serial.print("Amplitud pico a pico: ");
-    Serial.println(amplitud);
+    lcd.setCursor(0,0);
+    lcd.print("Amplitud: ");
+    lcd.print (amplitud);
+    /*    Serial.print("Amplitud pico a pico: ");
+    Serial.println(amplitud);*/
 
     // Calcular la frecuencia comparando picos
-    Serial.print("la frecuencia es: ");
+    lcd.setCursor(0,1);
+    lcd.print("Frecuencia: ");
+    lcd.print(Cfrecuencia(arrDatos, tiempos, capacidad,maxVal,Umbralerror));
+    /* Serial.print("la frecuencia es: ");
     Serial.println(Cfrecuencia(arrDatos, tiempos, capacidad,maxVal,Umbralerror));
-
+*/
+    delay(2000);
+    lcd.clear();
 
     // Determinar forma de la señal
     String forma = determinarForma();
-    Serial.print("Forma de la señal: ");
-    Serial.println(forma);
+    lcd.setCursor(0,0);
+    lcd.print("Forma Señal: ");
+    lcd.setCursor(0,1);
+    lcd.print(forma);
+    delay(2000);
+    lcd.clear();
+    /** Serial.print("Forma de la señal: ");
+    Serial.println(forma);*/
 }
 
 String determinarForma() {
@@ -206,4 +224,5 @@ float Cfrecuencia(int* arrDatos, unsigned long* tiempos, int capacidad, int ampl
 
     return frecuencia;
 }
+
 
