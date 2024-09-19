@@ -6,9 +6,9 @@ int analogPin = A0;        // Pin de entrada analógica
 int val = 0;               // Valor leído del pin analógico
 int maxVal = 0;            // Valor máximo de la señal
 int minVal = 1023;         // Valor mínimo de la señal
-unsigned long startTime;
-const unsigned long samplingTime = 1000; // Tiempo de muestreo (1 segundo)
-unsigned int Umbralerror = 50;
+signed long startTime;
+const signed long samplingTime = 1000; // Tiempo de muestreo (1 segundo)
+signed int Umbralerror = 50;
 
 // Configuración de botones
 const int botonPin = 2;    // Botón para iniciar la adquisición
@@ -17,8 +17,8 @@ const int botonpin2 = 4;   // Botón para detener la adquisición
 const int capacidadInicial = 100; // Tamaño inicial estimado
 int capacidad = capacidadInicial;
 int* arrDatos;             // Arreglo dinámico para datos
-unsigned long* tiempos;    // Arreglo para almacenar tiempos
-unsigned int index = 0;    // Índice para almacenar los valores en el arreglo
+signed long* tiempos;    // Arreglo para almacenar tiempos
+signed int index = 0;    // Índice para almacenar los valores en el arreglo
 bool capturandoDatos = false;  // Bandera para determinar si se está capturando
 
 void setup() {
@@ -75,23 +75,23 @@ void loop() {
         if (val < minVal) minVal = val;
 
         index++;
-        delay(100);  // Pausa corta
+        delay(10);  // Pausa corta
     }
 
     delay(100); // Pausa para evitar múltiples lecturas de los botones
 }
 
-void redArr(int*& arrDatos, unsigned long*& tiempos, int& capacidad) {
+void redArr(int*& arrDatos, signed long*& tiempos, int& capacidad) {
     int nuevaCap = capacidad * 2;
     int* nuevoArrDatos = new int[nuevaCap];
-    for (unsigned int i = 0; i < capacidad; i++) {
+    for (signed int i = 0; i < capacidad; i++) {
         nuevoArrDatos[i] = arrDatos[i];
     }
     delete[] arrDatos;
     arrDatos = nuevoArrDatos;
 
-    unsigned long* nuevoTiempos = new unsigned long[nuevaCap];
-    for (unsigned int i = 0; i < capacidad; i++) {
+    signed long* nuevoTiempos = new signed long[nuevaCap];
+    for (signed int i = 0; i < capacidad; i++) {
         nuevoTiempos[i] = tiempos[i];
     }
     delete[] tiempos;
@@ -101,12 +101,12 @@ void redArr(int*& arrDatos, unsigned long*& tiempos, int& capacidad) {
 }
 
 void calcularResultados() {
-    int amplitud = maxVal - minVal;
+    int amplitudpico = maxVal - minVal;
     lcd.setCursor(0, 0);
     lcd.print("Amplitud: ");
-    lcd.print(amplitud);
-
-    float frecuencia = Cfrecuencia(arrDatos, tiempos, capacidad, maxVal, Umbralerror);
+    lcd.print(amplitudpico);
+    int amplitud=amplitudpico/2;
+    float frecuencia = Cfrecuencia(arrDatos, tiempos, capacidad, amplitud, Umbralerror);
     lcd.setCursor(0, 1);
     lcd.print("Frecuencia: ");
     lcd.print(frecuencia);
@@ -158,9 +158,9 @@ int determinarForma() {
     return 3; // Desconocida
 }
 
-float Cfrecuencia(int* arrDatos, unsigned long* tiempos, int capacidad, int amplitud, unsigned int Umbralerror) {
-    unsigned int count = 0;
-    unsigned long time1 = 0, time2 = 0;
+float Cfrecuencia(int* arrDatos, signed long* tiempos, int capacidad, int amplitud, signed int Umbralerror) {
+    signed int count = 0;
+    signed long time1 = 0, time2 = 0;
     float frecuencia = 0.0;
 
     for (unsigned int i = 0; i < capacidad; i++) {
@@ -176,7 +176,7 @@ float Cfrecuencia(int* arrDatos, unsigned long* tiempos, int capacidad, int ampl
     }
 
     if (time2 > time1) {
-        unsigned long periodo = time2 - time1;
+        signed long periodo = time2 - time1;
         frecuencia = 1000.0 / periodo;
     } else {
         Serial.println("No se encontraron dos picos para calcular la frecuencia.");
@@ -195,6 +195,5 @@ void liberarMemoria() {
 void inicializarMemoria() {
     // Reservar nueva memoria para los arreglos
     arrDatos = new int[capacidad];
-    tiempos = new unsigned long[capacidad];
+    tiempos = new signed long[capacidad];
 }
-
